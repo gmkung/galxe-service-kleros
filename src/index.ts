@@ -1,5 +1,8 @@
 import express, { Request, Response } from "express";
 import axios from "axios";
+import dotenv from "dotenv";
+
+dotenv.config(); // Load environment variables from .env
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -13,12 +16,12 @@ app.post("/upsertAddress", async (req: Request, res: Response) => {
     return res.status(400).send("Bad Request: contractAddress is required");
   }
 
-  const credId = "123"; // Example credential ID
+  const credId = "415873790728261632"; // Example credential ID
   const operation = "APPEND"; // Example operation
   const items = [contractAddress]; // Use the received contractAddress
 
   try {
-    let result = await axios.post(
+    const result = await axios.post(
       "https://graphigo.prd.galaxy.eco/query",
       {
         operationName: "credentialItems",
@@ -43,7 +46,7 @@ app.post("/upsertAddress", async (req: Request, res: Response) => {
       },
       {
         headers: {
-          "access-token": process.env.GALXE_ACCESS_TOKEN_c2F6, // Replace with your access token
+          "access-token": process.env.GALXE_ACCESS_TOKEN_c2F6, // Use the environment variable
         },
       }
     );
@@ -57,9 +60,18 @@ app.post("/upsertAddress", async (req: Request, res: Response) => {
 
     res.status(200).json(result.data);
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Internal Server Error", details: error.message });
+    if (axios.isAxiosError(error)) {
+      // Axios-specific error handling
+      res.status(500).json({ error: "Axios Error", details: error.message });
+    } else if (error instanceof Error) {
+      // General error handling
+      res
+        .status(500)
+        .json({ error: "Internal Server Error", details: error.message });
+    } else {
+      // Fallback for unknown error types
+      res.status(500).json({ error: "Unknown Error" });
+    }
   }
 });
 
