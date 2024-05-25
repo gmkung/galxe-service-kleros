@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
 import axios from "axios";
 import dotenv from "dotenv";
-import cors from 'cors';
 
+import cors from "cors";
 
 dotenv.config(); // Load environment variables from .env
 
